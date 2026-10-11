@@ -86,9 +86,22 @@ main { padding:18px 14px 32px; }
 h2 { font-size:1.1rem; margin:0 0 12px; }
 h3 { font-size:.98rem; margin:17px 0 8px; }
 
+
 #board {
-  width:min(100%,520px);
-  margin:0 auto;
+  width: min(100%, 520px);
+  margin: 0 auto;
+
+  /* Allow finger dragging on the chessboard */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent touch gestures on the board from scrolling the page */
+#board,
+#board * {
+  touch-action: none;
 }
 
 .board-help, .note {
@@ -751,6 +764,14 @@ $(function() {
     .addEventListener("click", () => replay(0));
 
   replay(0);
+
+  
+  // Keep touch-dragging on the chessboard from scrolling the page.
+  const chessboardElement = document.getElementById("board");
+
+  chessboardElement.addEventListener("touchmove", function(event) {
+    event.preventDefault();
+  }, { passive: false });
 
   window.addEventListener("resize", () => board.resize());
 });
