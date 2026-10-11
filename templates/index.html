@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Learn and practise the Trompowsky Attack with ChessArenaX.">
+<title>Trompowsky Attack | ChessArenaX</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+
+<style>
+:root {
+  --ink:#17202e;
+  --muted:#5b6573;
+  --paper:#f4f6fa;
+  --line:#e1e6ef;
+  --blue:#edf4ff;
+  --gold:#e4b647;
+  --green:#e8f7ee;
+  --red:#fff0ef;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+
+header {
+  background:#17202e;
+  color:white;
+  padding:22px 16px;
+}
+
+.header-inner, main, footer {
+  max-width:1120px;
+  margin:auto;
+}
+
+.eyebrow {
+  text-transform:uppercase;
+  letter-spacing:.13em;
+  font-size:.75rem;
+  color:#f1cb68;
+  font-weight:800;
+}
+
+h1 {
+  margin:6px 0;
+  font-size:clamp(1.7rem,4vw,2.5rem);
+}
+
+header p { margin:0; color:#d8dfeb; }
+
+main { padding:18px 14px 32px; }
+
+.intro {
+  background:#fff8e6;
+  border:1px solid #f0d991;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:16px;
+  line-height:1.6;
+}
+
+.layout {
+  display:grid;
+  grid-template-columns:minmax(280px,1.02fr) minmax(280px,.98fr);
+  gap:16px;
+  align-items:start;
+}
+
+.card {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:15px;
+  box-shadow:0 3px 14px #15223808;
+  min-width:0;
+}
+
+h2 { font-size:1.1rem; margin:0 0 12px; }
+h3 { font-size:.98rem; margin:17px 0 8px; }
+
+#board {
+  width:min(100%,520px);
+  margin:0 auto;
+}
+
+.board-help, .note {
+  color:var(--muted);
+  font-size:.87rem;
+  line-height:1.5;
+}
+
+.board-help {
+  text-align:center;
+  margin:10px 0 12px;
+}
+
+.controls {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin:12px 0;
+}
+
+button, select {
+  border:1px solid #cbd3df;
+  background:white;
+  color:var(--ink);
+  padding:10px 12px;
+  border-radius:9px;
+  font:inherit;
+  cursor:pointer;
+}
+
+button.primary, button.selected {
+  background:#17202e;
+  color:white;
+  border-color:#17202e;
+}
+
+button:disabled {
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+select {
+  width:100%;
+  margin:7px 0 12px;
+}
+
+.mode-row {
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.mode-row button { flex:1; }
+
+.pill {
+  display:inline-block;
+  background:#e9f7ef;
+  color:#17663b;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:.78rem;
+  font-weight:750;
+  margin-bottom:9px;
+}
+
+.move-status {
+  font-weight:750;
+  min-height:1.5em;
+  margin-bottom:8px;
+}
+
+.feedback {
+  padding:11px 12px;
+  border-radius:9px;
+  line-height:1.5;
+  margin:10px 0;
+  font-size:.91rem;
+}
+
+.feedback.info { background:var(--blue); }
+.feedback.good { background:var(--green); color:#155b35; }
+.feedback.bad { background:var(--red); color:#8c2923; }
+
+.explanation {
+  background:var(--blue);
+  border-radius:10px;
+  padding:13px;
+  line-height:1.6;
+  min-height:108px;
+}
+
+.explanation strong {
+  display:block;
+  margin-bottom:6px;
+}
+
+.move-list {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px;
+}
+
+.move-chip {
+  padding:6px 8px;
+  font-size:.86rem;
+  border-radius:7px;
+  background:#f0f2f6;
+  border:1px solid transparent;
+}
+
+.move-chip.active {
+  background:#ffe9a6;
+  border-color:#d4a32a;
+  font-weight:800;
+}
+
+.strategy {
+  background:#f7f8fb;
+  border:1px solid var(--line);
+  padding:12px;
+  border-radius:10px;
+  line-height:1.6;
+  font-size:.92rem;
+}
+
+.note { margin-top:14px; }
+
+footer {
+  padding:0 14px 22px;
+  font-size:.82rem;
+  color:var(--muted);
+}
+
+@media(max-width:760px) {
+  .layout { grid-template-columns:1fr; }
+  .card { padding:12px; }
+  header { padding:18px 14px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">ChessArenaX · Opening Trainer</div>
+    <h1>Trompowsky Attack</h1>
+    <p>A practical White opening built around 1.d4 Nf6 2.Bg5.</p>
+  </div>
+</header>
+
+<main>
+
+<div class="intro">
+  <strong>White's opening strategy:</strong>
+  White develops the bishop to g5 before committing the b1-knight.
+  This immediately challenges Black's f6-knight. White can exchange
+  the bishop to influence Black's pawn structure or preserve it and
+  use the resulting pressure to develop actively.
+
+  <br><br>
+
+  The key is to combine central control, efficient development and
+  king safety. The Trompowsky is not a forced attack: Black has
+  several sound ways to equalise, and White must respond to Black's
+  central counterplay.
+</div>
+
+<div class="layout">
+
+<section class="card">
+  <h2>Interactive chessboard</h2>
+
+  <div id="board"></div>
+
+  <div class="board-help" id="boardHelp">
+    Drag a piece to move it, or tap a piece and its destination square.
+  </div>
+
+  <div class="controls">
+    <button id="startBtn">⏮ Start</button>
+    <button id="prevBtn">← Previous</button>
+    <button id="nextBtn" class="primary">Next →</button>
+    <button id="endBtn">End ⏭</button>
+    <button id="resetBtn">Reset line</button>
+  </div>
+
+  <div id="feedback" class="feedback info" role="status" aria-live="polite">
+    Select a variation to begin your lesson.
+  </div>
+
+  <p class="note">
+    In Guided Mode, follow the prepared moves. In Study Mode, play
+    the next move yourself by dragging a piece. Incorrect moves are
+    rejected, and you can retry.
+  </p>
+</section>
+
+<section class="card">
+
+  <h2>Opening lesson</h2>
+
+  <div class="mode-row">
+    <button id="guidedModeBtn" class="selected" type="button">
+      Guided Mode
+    </button>
+    <button id="studyModeBtn" type="button">
+      Study Mode
+    </button>
+  </div>
+
+  <label for="variationSelect"><strong>Choose a variation</strong></label>
+
+  <select id="variationSelect">
+    <option value="0">Line 1 — 2...Ne4: Challenge the bishop</option>
+    <option value="1">Line 2 — 2...d5: Central setup</option>
+    <option value="2">Line 3 — 2...e6: Flexible development</option>
+  </select>
+
+  <div class="pill" id="modePill">Move-by-move lesson</div>
+
+  <div id="moveStatus" class="move-status">Starting position</div>
+
+  <div id="explanation" class="explanation">
+    <strong>Opening idea</strong>
+    Press Next to study the moves and the strategic reason behind each one.
+  </div>
+
+  <h3>Moves in this line</h3>
+  <div id="moveList" class="move-list"></div>
+
+  <h3>Strategic plan for White</h3>
+  <div id="whitePlan" class="strategy"></div>
+
+  <h3>Strategic plan for Black</h3>
+  <div id="blackPlan" class="strategy"></div>
+
+  <p class="note">
+    These are illustrative training lines, not forced sequences.
+    Always check the opponent's alternatives and tactical resources.
+  </p>
+
+</section>
+</div>
+</main>
+
+<footer>ChessArenaX · Educational opening guide</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+
+<script>
+const lines = [
+{
+  whitePlan:
+    "Preserve the bishop on f4 and use f3 to challenge the knight on e4. Then establish the d5/e4 pawn centre, restrict Black's pieces, and complete development. White's space advantage is useful only if the centre remains supported. Avoid further pawn advances without checking whether Black can undermine the base.",
+
+  blackPlan:
+    "Use ...Ne4 to gain time against the bishop, then challenge d4 with ...c5. After the knight retreats, develop with ...d6 and ...g6, fianchetto the bishop and castle. Black's objective is to undermine White's broad centre, not to place a knight passively where White's d-pawn can capture it.",
+
+  moves: [
+    ["d4","White","White claims central space, controls e5 and opens the c1-bishop's diagonal. The d-pawn will become the base of White's central structure."],
+    ["Nf6","Black","Black develops toward the centre and controls e4 and d5. This flexible move prepares several possible setups."],
+    ["Bg5","White","The Trompowsky move. White pressures the f6-knight before committing the b1-knight to c3. White may exchange the bishop or preserve it depending on Black's response."],
+    ["Ne4","Black","Black attacks the bishop with a centralised knight, gaining time and asking White to make a decision. The knight is active, but it can also become a target."],
+    ["Bf4","White","White preserves the bishop on a useful diagonal rather than exchanging it automatically. The bishop can support central play and remain active."],
+    ["c5","Black","Black challenges d4 from the flank. This is important counterplay: Black attacks the base of White's centre before it becomes too stable."],
+    ["f3","White","White attacks the knight on e4 and prepares to support e4. The drawback is that f3 weakens some kingside squares and costs a tempo, so White should use the space gained actively."],
+    ["Nf6","Black","Black retreats the attacked knight. Although Black has moved the knight twice, White has also spent a tempo on f3. Black should now focus on undermining the centre."],
+    ["d5","White","White gains space and restricts Black's pieces. The pawn cramps Black's position, but can become a target if White fails to support it."],
+    ["d6","Black","Black supports the centre and prepares to challenge White's advanced d-pawn. The move maintains a compact structure while Black completes development."],
+    ["e4","White","White establishes a broad pawn centre and supports d5. This space can restrict Black, but White must develop pieces to defend and exploit it."],
+    ["g6","Black","Black prepares a kingside fianchetto. The bishop on g7 will pressure White's centre along the long diagonal."],
+    ["Nc3","White","White develops the b1-knight and reinforces the centre. White is now bringing pieces into play to support the space advantage."],
+    ["Bg7","Black","Black fianchettoes the bishop, putting long-range pressure on White's central pawns. Black aims to challenge the pawn chain rather than let it dominate uncontested."],
+    ["Qd2","White","White connects the queen with the kingside and supports coordinated development. The queen may help prepare castling, but White should avoid spending too many moves on queen manoeuvres."],
+    ["O-O","Black","Black castles to safety and connects the rooks. This is a sound developing move. A knight on c6 would be vulnerable to White's d5-pawn, so Black should not play ...Nc6 carelessly."]
+  ]
+},
+
+{
+  whitePlan:
+    "White exchanges the bishop for the f6-knight, accepting the loss of the bishop pair in exchange for influencing Black's pawn structure. After ...exf6, develop normally, challenge the centre with c4 and put pressure on d5. The doubled f-pawns are potential long-term targets, but they do not automatically mean Black is worse.",
+
+  blackPlan:
+    "Recapture with the e-pawn to preserve a strong central presence and open the e-file, accepting doubled f-pawns as a structural concession. Support the centre with ...c6, develop the bishops and knights, and castle. Active pieces and central control can compensate for an imperfect pawn structure.",
+
+  moves: [
+    ["d4","White","White claims central space and opens the c1-bishop's diagonal. The d-pawn supports future central play."],
+    ["Nf6","Black","Black develops toward the centre, controlling e4 and d5 while keeping the position flexible."],
+    ["Bg5","White","White immediately challenges the f6-knight before developing the b1-knight. The bishop exchange can influence Black's pawn structure."],
+    ["d5","Black","Black occupies the centre and establishes a solid pawn on d5. Black accepts the challenge by contesting White's central influence."],
+    ["Bxf6","White","White exchanges the bishop for the knight, removing a central defender. White's strategic aim is to make Black's pawn structure less tidy, not to win material immediately."],
+    ["exf6","Black","Black recaptures with the e-pawn. This creates doubled f-pawns, but also gives Black a strong central presence and opens the e-file for a rook."],
+    ["e3","White","White supports d4 and opens the f1-bishop's diagonal. This quiet move prioritises development and central stability over an immediate attack."],
+    ["c6","Black","Black reinforces d5 and creates a sturdy pawn chain. The move also helps Black maintain central control."],
+    ["c4","White","White challenges Black's d5-pawn and contests the centre. Attacking the pawn chain is a more concrete plan than focusing only on Black's doubled pawns."],
+    ["Be6","Black","Black develops the c8-bishop outside the pawn chain and adds influence over central squares."],
+    ["cxd5","White","White exchanges the c-pawn for Black's d-pawn, testing the centre and opening the c-file. White should consider the recapture before committing."],
+    ["cxd5","Black","Black's pawn from c6 recaptures on d5, restoring a central pawn and keeping the structure compact."],
+    ["Nc3","White","White develops the b1-knight and adds pressure to d5. Natural development is the best way to make use of the central tension."],
+    ["Nc6","Black","Black develops the b8-knight and adds support to the centre. The d-pawn has already been exchanged, so White can no longer capture this knight with a pawn on d5."],
+    ["Bd3","White","White develops the bishop toward the kingside and prepares to castle. The bishop may contribute to pressure on h7 later."],
+    ["Bd6","Black","Black develops the f8-bishop actively and contests White's bishop. Black continues to coordinate pieces rather than focus only on pawn weaknesses."],
+    ["Nge2","White","White develops the g1-knight while keeping the f-pawn flexible. The knight may later move to f4 or g3."],
+    ["Ne7","Black","Black develops the g8-knight to e7, clearing g8 for castling. The knight remains flexible and can support central play."],
+    ["O-O","White","White castles, secures the king and connects the rooks. White can now focus on the centre and the open c-file."],
+    ["O-O","Black","Black also castles and brings the king to safety. Black's doubled f-pawns remain a structural concession, but the position is playable with active pieces."]
+  ]
+},
+
+{
+  whitePlan:
+    "White takes space with e4 and exchanges on f6 after ...h6. The e5 advance gains space and attacks Black's queen, but it also commits a pawn far forward. White should support the centre, develop the knights and bishops, and castle before attempting a direct kingside attack.",
+
+  blackPlan:
+    "Black uses ...e6 to support the centre and free the f8-bishop. After ...h6 and Bxf6, the queen recapture preserves the pawn structure but places the queen on a square where White can gain time with development. Black should challenge White's centre with ...d6 and ...c5 and finish development before White's space advantage becomes dangerous.",
+
+  moves: [
+    ["d4","White","White takes central space and opens the c1-bishop's diagonal. The pawn supports a possible e4 push."],
+    ["Nf6","Black","Black develops toward the centre and controls e4 and d5. Black keeps the option of several central setups."],
+    ["Bg5","White","White challenges the f6-knight before developing the b1-knight. White may exchange the bishop to remove a defender of the centre."],
+    ["e6","Black","Black supports central control and opens the f8-bishop's diagonal. The move keeps the setup flexible."],
+    ["e4","White","White builds a strong pawn centre and claims space. Black should challenge this centre rather than allow White to advance freely."],
+    ["h6","Black","Black asks the bishop to decide whether to exchange or retreat. The move gains space but can also create a potential kingside target."],
+    ["Bxf6","White","White exchanges the bishop for the knight, removing a key defender of e4. White gives up the bishop pair in return for a strategic change in Black's structure and control of central squares."],
+    ["Qxf6","Black","Black recaptures with the queen, preserving the pawn structure and placing the queen actively. The queen may become a target for developing moves, so Black must avoid losing time."],
+    ["Nc3","White","White develops the b1-knight and reinforces the centre. It supports e4 and prepares further development."],
+    ["Bb4","Black","Black pins the c3-knight and increases pressure on the centre. White must consider this pin before making central advances."],
+    ["e5","White","White gains space and attacks the queen on f6, forcing it to move. The advanced pawn restricts Black, but White must support it and avoid neglecting development."],
+    ["Qe7","Black","Black moves the queen out of the pawn's attack while retaining central influence. Black should now focus on completing development."],
+    ["Qg4","White","White brings the queen toward the kingside and eyes g7. This is an aggressive choice, but White must avoid relying on the queen alone for an attack."],
+    ["g6","Black","Black blocks the queen's direct pressure toward g7 and prepares a kingside structure. The move can weaken some dark squares, so Black must coordinate the king and bishop carefully."],
+    ["Nf3","White","White develops the g1-knight, supports the centre and prepares to castle. This is an important step toward bringing more pieces into the game."],
+    ["d6","Black","Black challenges the advanced e5-pawn and opens a route for the c8-bishop. Black tries to undermine White's space before it becomes permanent."],
+    ["Bd3","White","White develops the f1-bishop toward the kingside and supports castling. Any attack should be backed by development and king safety."],
+    ["c5","Black","Black strikes at d4 from the flank, challenging the base of White's centre. This counterplay is important to prevent White from building an attack without resistance."],
+    ["O-O","White","White castles to safety and connects the rooks. White can now decide whether to support the centre or build kingside pressure, depending on Black's response."]
+  ]
+}
+];
+
+const game = new Chess();
+let board = null;
+let lineIndex = 0;
+let ply = 0;
+let mode = "guided";
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
+
+function setFeedback(message, kind="info") {
+  const el = document.getElementById("feedback");
+  el.className = "feedback " + kind;
+  el.textContent = message;
+}
+
+function replay(target) {
+  game.reset();
+
+  const moves = lines[lineIndex].moves;
+  let reached = 0;
+
+  for (let i = 0; i < target; i++) {
+    const result = game.move(moves[i][0], {sloppy:true});
+
+    if (!result) {
+      console.error("Illegal move in line", lineIndex, "at ply", i, moves[i][0]);
+      setFeedback(
+        "A move in this line could not be applied. Please check the line.",
+        "bad"
+      );
+      break;
+    }
+
+    reached++;
+  }
+
+  ply = reached;
+  board.position(game.fen(), false);
+  render();
+
+  if (mode === "study") {
+    setFeedback(
+      ply >= moves.length
+        ? "Line complete! Restart practice to try it again."
+        : "Study Mode: drag the correct next move on the board.",
+      "info"
+    );
+  } else {
+    setFeedback("Use Next/Previous or select a move to review the lesson.", "info");
+  }
+}
+
+function render() {
+  const moves = lines[lineIndex].moves;
+  const status = document.getElementById("moveStatus");
+  const explanation = document.getElementById("explanation");
+  const list = document.getElementById("moveList");
+
+  document.getElementById("whitePlan").textContent = lines[lineIndex].whitePlan;
+  document.getElementById("blackPlan").textContent = lines[lineIndex].blackPlan;
+
+  document.getElementById("modePill").textContent =
+    mode === "study" ? "Study Mode · Play the next move" : "Move-by-move lesson";
+
+  if (ply === 0) {
+    status.textContent = "Starting position";
+    explanation.innerHTML =
+      "<strong>Opening strategy</strong>" +
+      escapeHtml(
+        "Start with 1.d4 and meet ...Nf6 with 2.Bg5. " +
+        (mode === "study"
+          ? "Try White's first move, 1.d4, by dragging the pawn from d2 to d4."
+          : "Press Next to explore the chosen line.")
+      );
+  } else {
+    const move = moves[ply - 1];
+    const moveNumber = Math.ceil(ply / 2);
+    const prefix = move[1] === "White"
+      ? moveNumber + ". "
+      : moveNumber + "... ";
+
+    status.textContent = prefix + move[0] + " — " + move[1];
+
+    explanation.innerHTML =
+      "<strong>" +
+      escapeHtml(move[1] + " played " + move[0]) +
+      "</strong>" +
+      escapeHtml(move[2]);
+  }
+
+  list.innerHTML = "";
+
+  moves.forEach((move, i) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className =
+      "move-chip" + (i === ply - 1 ? " active" : "");
+
+    button.textContent =
+      (i % 2 === 0
+        ? (Math.floor(i / 2) + 1) + ". "
+        : (Math.floor(i / 2) + 1) + "... ") +
+      move[0];
+
+    button.title = move[2];
+
+    button.addEventListener("click", () => {
+      mode = "guided";
+      updateModeButtons();
+      replay(i + 1);
+    });
+
+    list.appendChild(button);
+  });
+
+  document.getElementById("prevBtn").disabled =
+    ply === 0 || mode === "study";
+
+  document.getElementById("nextBtn").disabled =
+    ply >= moves.length || mode === "study";
+
+  document.getElementById("startBtn").disabled =
+    ply === 0 || mode === "study";
+
+  document.getElementById("endBtn").disabled =
+    ply >= moves.length || mode === "study";
+
+  document.getElementById("resetBtn").textContent =
+    mode === "study" ? "Restart practice" : "Reset line";
+}
+
+function updateModeButtons() {
+  document.getElementById("guidedModeBtn")
+    .classList.toggle("selected", mode === "guided");
+
+  document.getElementById("studyModeBtn")
+    .classList.toggle("selected", mode === "study");
+
+  document.getElementById("boardHelp").textContent =
+    mode === "study"
+      ? "Drag the correct next piece to its destination. Incorrect attempts are rejected."
+      : "Drag a piece to explore, or tap a piece and then its destination square.";
+
+  render();
+}
+
+
+function onDrop(source, target) {
+  // Save the position BEFORE attempting the move.
+  // This preserves the correct position for validating the answer.
+  const positionBefore = new Chess(game.fen());
+
+  const move = game.move({
+    from: source,
+    to: target,
+    promotion: "q"
+  });
+
+  if (move === null) {
+    setFeedback(
+      "That move is illegal in this position. Try another square.",
+      "bad"
+    );
+    return "snapback";
+  }
+
+  if (mode === "study") {
+    const expected = lines[lineIndex].moves[ply];
+
+    if (!expected) {
+      game.undo();
+      setFeedback(
+        "Line complete! Restart practice to try again.",
+        "info"
+      );
+      return "snapback";
+    }
+
+    // Find the expected move in the original position.
+    const expectedMove = positionBefore.move(
+      expected[0],
+      { sloppy: true }
+    );
+
+    if (!expectedMove) {
+      game.undo();
+      board.position(game.fen(), false);
+      setFeedback(
+        "There is a problem with the prepared lesson move: " +
+        expected[0],
+        "bad"
+      );
+      return "snapback";
+    }
+
+    // Compare actual and expected origin/destination squares.
+    const correct =
+      move.from === expectedMove.from &&
+      move.to === expectedMove.to &&
+      (move.promotion || "") ===
+        (expectedMove.promotion || "");
+
+    if (!correct) {
+      game.undo();
+      board.position(game.fen(), false);
+
+      setFeedback(
+        "Not quite! Try " + expected[0] +
+        ". Hint: " + expected[2],
+        "bad"
+      );
+
+      return "snapback";
+    }
+
+    // Correct answer: keep the move and advance the lesson.
+    ply++;
+    board.position(game.fen(), false);
+    render();
+
+    if (ply >= lines[lineIndex].moves.length) {
+      setFeedback(
+        "Excellent! You completed the entire variation. " +
+        "Restart practice to repeat it.",
+        "good"
+      );
+    } else {
+      setFeedback(
+        "Correct! " + expected[0] + " — " + expected[2],
+        "good"
+      );
+    }
+
+    return;
+  }
+
+  // Guided Mode: allow free exploration.
+  board.position(game.fen(), false);
+
+  document.getElementById("moveStatus").textContent =
+    "Free exploration: " + move.san;
+
+  document.getElementById("explanation").innerHTML =
+    "<strong>Your move</strong>" +
+    "You played " + escapeHtml(move.san) +
+    ". Reset the line or choose a variation to return to the lesson.";
+
+  setFeedback(
+    "Free exploration: reset the line to resume the prepared lesson.",
+    "info"
+  );
+
+  document.getElementById("prevBtn").disabled = true;
+  document.getElementById("nextBtn").disabled = true;
+}
+
+function onSnapEnd() {
+  board.position(game.fen(), false);
+}
+
+$(function() {
+  board = Chessboard("board", {
+    position:"start",
+    draggable:true,
+    dropOffBoard:"snapback",
+    onDrop:onDrop,
+    onSnapEnd:onSnapEnd,
+    pieceTheme:"https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png"
+  });
+
+  document.getElementById("variationSelect")
+    .addEventListener("change", function() {
+      lineIndex = Number(this.value);
+      replay(0);
+    });
+
+  document.getElementById("guidedModeBtn")
+    .addEventListener("click", function() {
+      mode = "guided";
+      updateModeButtons();
+      replay(ply);
+    });
+
+  document.getElementById("studyModeBtn")
+    .addEventListener("click", function() {
+      mode = "study";
+      updateModeButtons();
+      replay(0);
+    });
+
+  document.getElementById("startBtn")
+    .addEventListener("click", () => replay(0));
+
+  document.getElementById("prevBtn")
+    .addEventListener("click", () => replay(Math.max(0, ply - 1)));
+
+  document.getElementById("nextBtn")
+    .addEventListener("click", () =>
+      replay(Math.min(lines[lineIndex].moves.length, ply + 1))
+    );
+
+  document.getElementById("endBtn")
+    .addEventListener("click", () =>
+      replay(lines[lineIndex].moves.length)
+    );
+
+  document.getElementById("resetBtn")
+    .addEventListener("click", () => replay(0));
+
+  replay(0);
+
+  window.addEventListener("resize", () => board.resize());
+});
+</script>
+
+</body>
+</html>
